@@ -1,9 +1,7 @@
-"""Importer URL routes."""
-
 from django.urls import path
-from .views import ImportJobListCreateView, ImportJobDetailView
+from .views import ImportIssueListCreateView, ImportIssueDetailView
 
 urlpatterns = [
-    path("",        ImportJobListCreateView.as_view(), name="importjob-list"),
-    path("<int:pk>/", ImportJobDetailView.as_view(),    name="importjob-detail"),
+    path("", ImportIssueListCreateView.as_view(), name="importissue-list"),
+    path("<int:pk>/", ImportIssueDetailView.as_view(), name="importissue-detail"),
 ]

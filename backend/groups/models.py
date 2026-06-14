@@ -1,37 +1,43 @@
-"""
-Groups app models.
-
-A Group is a collection of users who share expenses together
-(e.g., a trip, a household, a team).
-"""
-
 from django.conf import settings
 from django.db import models
 
-
-class Group(models.Model):
+class ExpenseGroup(models.Model):
     """
-    Represents a shared expense group.
-    `settings.AUTH_USER_MODEL` always points to our custom User model.
+    Represents a shared expense group (e.g., Trip, Household).
+    This model exists to group expenses together and serve as the boundary
+    for shared liabilities.
     """
-
-    name        = models.CharField(max_length=100)
-    description = models.TextField(blank=True)
-    created_by  = models.ForeignKey(
+    name = models.CharField(max_length=100)
+    created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,         # If creator is deleted, delete the group too
-        related_name="created_groups",
+        on_delete=models.CASCADE,
+        related_name="created_expense_groups"
     )
 
-    # ManyToMany: one group has many members, one user can be in many groups
-    members = models.ManyToManyField(
-        settings.AUTH_USER_MODEL,
-        related_name="expense_groups",
-        blank=True,
-    )
-
-    created_at = models.DateTimeField(auto_now_add=True)  # Set once on creation
-    updated_at = models.DateTimeField(auto_now=True)      # Updated on every save
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.name
+
+class Membership(models.Model):
+    """
+    Tracks which users belong to which ExpenseGroup over time.
+    This model exists because membership dates decide who participates in an expense.
+    Users are only liable for expenses incurred between their joined_at and left_at dates.
+    """
+    group = models.ForeignKey(
+        ExpenseGroup,
+        on_delete=models.CASCADE,
+        related_name="memberships"
+    )
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="group_memberships"
+    )
+    joined_at = models.DateTimeField(auto_now_add=True)
+    left_at = models.DateTimeField(null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.user} in {self.group}"

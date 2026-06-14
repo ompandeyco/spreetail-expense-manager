@@ -1,11 +1,10 @@
-"""Register Group model in Django admin panel."""
-
 from django.contrib import admin
-from .models import Group
+from .models import ExpenseGroup, Membership
 
+@admin.register(ExpenseGroup)
+class ExpenseGroupAdmin(admin.ModelAdmin):
+    list_display = ["name", "created_by", "created_at"]
 
-@admin.register(Group)
-class GroupAdmin(admin.ModelAdmin):
-    list_display  = ["name", "created_by", "created_at"]
-    # `filter_horizontal` gives a nice UI for the ManyToMany members field
-    filter_horizontal = ["members"]
+@admin.register(Membership)
+class MembershipAdmin(admin.ModelAdmin):
+    list_display = ["group", "user", "joined_at", "left_at"]
