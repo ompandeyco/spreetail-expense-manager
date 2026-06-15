@@ -175,10 +175,14 @@ SIMPLE_JWT = {
 
 # ─── CORS (Cross-Origin Resource Sharing) ────────────────────────────────────
 # Allow the React dev server to make requests to this Django API
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",   # Vite default dev port
-    "http://localhost:3000",
-]
+cors_origins_env = os.getenv("CORS_ALLOWED_ORIGINS")
+if cors_origins_env:
+    CORS_ALLOWED_ORIGINS = [origin.strip() for origin in cors_origins_env.split(",")]
+else:
+    CORS_ALLOWED_ORIGINS = [
+        "http://localhost:5173",   # Vite default dev port
+        "http://localhost:3000",
+    ]
 
 
 STATIC_ROOT = BASE_DIR / "staticfiles"

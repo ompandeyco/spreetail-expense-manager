@@ -9,7 +9,7 @@
 import axios from 'axios'
 
 const api = axios.create({
-  baseURL: '/api', // Vite proxy forwards this to http://localhost:8000/api
+  baseURL: import.meta.env.VITE_API_URL || '/api', // Use VITE_API_URL if available, else fallback to Vite proxy
 })
 
 /**
