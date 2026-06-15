@@ -11,6 +11,7 @@ from rest_framework_simplejwt.views import (
     TokenObtainPairView,   # POST /api/token/         -> returns access + refresh
     TokenRefreshView,      # POST /api/token/refresh/ -> returns new access token
 )
+from importer.views import CsvImportAPIView
 
 urlpatterns = [
     # Django admin panel
@@ -26,4 +27,5 @@ urlpatterns = [
     path("api/expenses/",    include("expenses.urls")),
     path("api/importer/",    include("importer.urls")),
     path("api/settlements/", include("settlements.urls")),
+    path("api/import/csv/",  CsvImportAPIView.as_view(), name="csv-import"),
 ]
