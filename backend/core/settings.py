@@ -5,6 +5,7 @@ Reads sensitive values from environment variables via python-dotenv.
 """
 
 import os
+import dj_database_url
 from pathlib import Path
 from datetime import timedelta
 from dotenv import load_dotenv
@@ -91,16 +92,35 @@ WSGI_APPLICATION = "core.wsgi.application"
 
 
 # ─── Database (PostgreSQL) ────────────────────────────────────────────────────
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME":     os.getenv("DB_NAME", "spreetail_db"),
-        "USER":     os.getenv("DB_USER", "postgres"),
-        "PASSWORD": os.getenv("DB_PASSWORD", "postgres"),
-        "HOST":     os.getenv("DB_HOST", "localhost"),
-        "PORT":     os.getenv("DB_PORT", "5432"),
+# Production (Render): DATABASE_URL env var is set automatically by Render.
+# Local dev:           Individual DB_* env vars loaded from .env.
+_DATABASE_URL = os.getenv("DATABASE_URL")
+
+if _DATABASE_URL:
+    # ── Production / Render ──────────────────────────────────────────────────
+    # dj_database_url parses the full connection string into a Django DATABASES
+    # dict.  conn_max_age=600 keeps connections alive for 10 minutes (recommended
+    # for Render's managed Postgres).  ssl_require=True enforces TLS.
+    DATABASES = {
+        "default": dj_database_url.config(
+            default=_DATABASE_URL,
+            conn_max_age=600,
+            ssl_require=True,
+        )
     }
-}
+else:
+    # ── Local development ────────────────────────────────────────────────────
+    # Falls back to individual env vars defined in .env (DB_NAME, DB_USER, etc.)
+    DATABASES = {
+        "default": {
+            "ENGINE":   "django.db.backends.postgresql",
+            "NAME":     os.getenv("DB_NAME", "spreetail_db"),
+            "USER":     os.getenv("DB_USER", "postgres"),
+            "PASSWORD": os.getenv("DB_PASSWORD", "postgres"),
+            "HOST":     os.getenv("DB_HOST", "localhost"),
+            "PORT":     os.getenv("DB_PORT", "5432"),
+        }
+    }
 
 
 # ─── Password validation ──────────────────────────────────────────────────────
